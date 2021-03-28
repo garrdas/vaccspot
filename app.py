@@ -9,7 +9,12 @@ import yaml
 import logging
 
 # Configure basic logging
-logging.basicConfig(filename='./logs/log.log', level=logging.INFO)
+logging.basicConfig(
+	filename='./logs/log.log', 
+	format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s', 
+	datefmt='%Y-%m-%d,%H:%M:%S', 
+	level=logging.INFO
+	)
 
 # Read in config info
 info = yaml.safe_load(open('info.yml'))
@@ -100,6 +105,7 @@ def check_cvs():
     
     if not open_slots:
         logging.info('No available appointments found with CVS')
+        print('No CVS appointments available.')
     else:
         logging.info('Available appointments found with CVS')
     
