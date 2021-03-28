@@ -1,0 +1,6 @@
+*
+!.gitignore
+!app.py
+!zips.json
+!README.md
+!requirements.txt
