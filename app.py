@@ -1,3 +1,5 @@
+from datetime import datetime
+import pytz
 import requests
 import json
 import smtplib
@@ -64,8 +66,8 @@ def send_email_alert(provider,town,timestamp,code,link,zipcode,sender_email,send
     try:
         smtpserver.sendmail(sender_email, recipient, payload)
     except Exception as e:
-        logger.debug('Unable to send email, check security setting for email account')
-        logger.exception('Error: {}'.format(str(e)))
+        logging.debug('Unable to send email, check security setting for email account')
+        logging.exception('Error: {}'.format(str(e)))
     smtpserver.close()
     
     return
@@ -73,7 +75,7 @@ def send_email_alert(provider,town,timestamp,code,link,zipcode,sender_email,send
 
 # Check CVS for available appointments
 def check_cvs():
-    logger.debug('Called check_cvs')
+    logging.debug('Called check_cvs')
 
     # Define parameters
     open_slots = []
@@ -86,7 +88,7 @@ def check_cvs():
         req = requests.get(url, headers=headers)
         logging.debug('Request successful')
     except Exception as e:
-        logger.exception('Error with CVS request:', e)
+        logging.exception('Error with CVS request:', e)
         return e
     
     # Parse response
