@@ -19,8 +19,8 @@ def get_zips():
 # Send email alert
 def send_email_alert(provider,town,timestamp,code,link,zipcode,sender_email,sender_pw,recipient):
 
-    # Establish server
     try:
+        # Establish server
         smtpserver = smtplib.SMTP("smtp.gmail.com", 587)
         smtpserver.ehlo()
         smtpserver.starttls()
@@ -45,7 +45,7 @@ def send_email_alert(provider,town,timestamp,code,link,zipcode,sender_email,send
         Go to {a} website now!
 
         CODE IN: {d}
-        Link: {e}""".format(a=provider, b=town, c=timestamp, d='testing-code', e=link, f=zipcode)
+        Link: {e}""".format(a=provider, b=town, c=timestamp, d=code, e=link, f=zipcode)
         payload = header + message
 
         # Send email
