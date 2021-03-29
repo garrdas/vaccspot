@@ -9,33 +9,8 @@ import time
 import sched
 import logging
 
-# Configure basic logging
-logging.basicConfig(
-	filename='./logs/log.log', 
-	format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s', 
-	datefmt='%Y-%m-%d,%H:%M:%S', 
-	level=logging.INFO
-	)
-
-# Create scheduler
-s = sched.scheduler(time.time, time.sleep)
-
-# Read in config info
-info = yaml.safe_load(open('info.yml'))
-sender_email = info['alert']['sender']
-sender_pw = os.getenv('VACCSPOT_PASS')
-recipient = info['alert']['target']
-code = info['alert']['codein']
-
-# Provider website links
-links = {
-    'CVS':'https://www.cvs.com/vaccine/intake/store/cvd-store-select/first-dose-select',
-    'Walgreens':'https://www.walgreens.com/findcare/vaccination/covid-19/location-screening'
-}
-
 # Get dictionary of zip codes for towns
 def get_zips():
-    global zips
     with open('zips.json') as json_file:
         zips = json.load(json_file)
     return zips
@@ -45,41 +20,46 @@ def get_zips():
 def send_email_alert(provider,town,timestamp,code,link,zipcode,sender_email,sender_pw,recipient):
 
     # Establish server
-    smtpserver = smtplib.SMTP("smtp.gmail.com", 587)
-    smtpserver.ehlo()
-    smtpserver.starttls()
-    smtpserver.ehlo
-    
-    # Log in
     try:
-        smtpserver.login(sender_email, sender_pw)
-        logging.debug('Successful login')
-    except Exception as e:
-        logging.debug('Could not log in, check env vars')
-        logging.exception('Error:', e)
+        smtpserver = smtplib.SMTP("smtp.gmail.com", 587)
+        smtpserver.ehlo()
+        smtpserver.starttls()
+        smtpserver.ehlo
 
-    # Construct message
-    header = 'To:' + recipient + '\n' + 'From: ' + sender_email + '\n' + 'Subject: VACCSPOT: {a} {b} {c} \n'.format(a=provider, b=town, c=zipcode)
-    message = """\
-    \n
-    Vaccspot bot found an available vaccination slot!
+        # Log in
+        try:
+            smtpserver.login(sender_email, sender_pw)
+            logging.debug('Successful login')
+        except Exception as e:
+            logging.debug('Could not log in, check env vars')
+            logging.error('Error:', e)
 
-    Appointment(s) avaialbe at {a} {b} {f} as of {c}
+        # Construct message
+        header = 'To:' + recipient + '\n' + 'From: ' + sender_email + '\n' + 'Subject: VACCSPOT: {a} {b} {c} \n'.format(a=provider, b=town, c=zipcode)
+        message = """\
+        \n
+        Vaccspot bot found an available vaccination slot!
 
-    Go to {a} website now!
+        Appointment(s) avaialbe at {a} {b} {f} as of {c}
 
-    CODE IN: {d}
-    Link: {e}""".format(a=provider, b=town, c=timestamp, d='testing-code', e=link, f=zipcode)
-    payload = header + message
+        Go to {a} website now!
 
-    # Send email
-    try:
-        smtpserver.sendmail(sender_email, recipient, payload)
-    except Exception as e:
-        logging.debug('Unable to send email, check security setting for email account')
-        logging.exception('Error: {}'.format(str(e)))
-    smtpserver.close()
+        CODE IN: {d}
+        Link: {e}""".format(a=provider, b=town, c=timestamp, d='testing-code', e=link, f=zipcode)
+        payload = header + message
+
+        # Send email
+        try:
+            smtpserver.sendmail(sender_email, recipient, payload)
+        except Exception as e:
+            logging.debug('Unable to send email, check security setting for email account')
+            logging.error('Error: {}'.format(str(e)))
+        smtpserver.close()
     
+    except Exception as e:
+        logging.debug('Could not establish SMTP server')
+        logging.error('Error: ', e)
+   
     return
 
 
@@ -98,7 +78,7 @@ def check_cvs():
         req = requests.get(url, headers=headers)
         logging.debug('Request successful')
     except Exception as e:
-        logging.exception('Error with CVS request:', e)
+        logging.error('Error with CVS request:', e)
         return e
     
     # Parse response
@@ -118,17 +98,45 @@ def check_cvs():
 
 
 def main():
+    # Configure basic logging
+    logging.basicConfig(
+        filename='./logs/log.log', 
+        format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s', 
+        datefmt='%Y-%m-%d,%H:%M:%S', 
+        level=logging.INFO
+        )
+
+    # Create scheduler
+    s = sched.scheduler(time.time, time.sleep)
+
+    # Read in config info
+    info = yaml.safe_load(open('info.yml'))
+    sender_email = info['alert']['sender']
+    sender_pw = os.getenv('VACCSPOT_PASS')
+    recipient = info['alert']['target']
+    code = info['alert']['codein']
+
+    # Provider website links
+    links = {
+        'CVS':'https://www.cvs.com/vaccine/intake/store/cvd-store-select/first-dose-select',
+        'Walgreens':'https://www.walgreens.com/findcare/vaccination/covid-19/location-screening'
+    }
+
+    # Get zip codes
+    zips = get_zips()
+
     cvs_openings = check_cvs()
     for slot in cvs_openings:
-        send_email_alert('CVS',slot[0],slot[2],code,links['CVS'],zips[slot[0]],sender_email,sender_pw,recipient)
+
+        # Get zip code if town is dict key
+        zipcode = zips.get([slot[0]], 'Not Found')
+
+        send_email_alert('CVS',slot[0],slot[2],code,links['CVS'],zipcode,sender_email,sender_pw,recipient)
 
 
 def schedule_checks(sc):
     main()
     s.enter(60, 1, schedule_checks, (sc,))
-
-
-get_zips()
 
 print('Starting now...')
 s.enter(60, 1, schedule_checks, (s,))
