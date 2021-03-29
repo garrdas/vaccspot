@@ -1,5 +1,6 @@
 from datetime import datetime
 import requests
+import smtplib
 import json
 import pytz
 import ssl
@@ -106,9 +107,6 @@ def main():
         level=logging.INFO
         )
 
-    # Create scheduler
-    s = sched.scheduler(time.time, time.sleep)
-
     # Read in config info
     info = yaml.safe_load(open('info.yml'))
     sender_email = info['alert']['sender']
@@ -129,7 +127,7 @@ def main():
     for slot in cvs_openings:
 
         # Get zip code if town is dict key
-        zipcode = zips.get([slot[0]], 'Not Found')
+        zipcode = zips.get(slot[0], 'Not Found')
 
         send_email_alert('CVS',slot[0],slot[2],code,links['CVS'],zipcode,sender_email,sender_pw,recipient)
 
@@ -137,6 +135,10 @@ def main():
 def schedule_checks(sc):
     main()
     s.enter(60, 1, schedule_checks, (sc,))
+
+
+# Create scheduler
+s = sched.scheduler(time.time, time.sleep)
 
 print('Starting now...')
 s.enter(60, 1, schedule_checks, (s,))
