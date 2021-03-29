@@ -1,11 +1,12 @@
 from datetime import datetime
-import pytz
 import requests
 import json
-import smtplib
+import pytz
 import ssl
 import os
 import yaml
+import time
+import sched
 import logging
 
 # Configure basic logging
@@ -15,6 +16,9 @@ logging.basicConfig(
 	datefmt='%Y-%m-%d,%H:%M:%S', 
 	level=logging.INFO
 	)
+
+# Create scheduler
+s = sched.scheduler(time.time, time.sleep)
 
 # Read in config info
 info = yaml.safe_load(open('info.yml'))
@@ -31,9 +35,10 @@ links = {
 
 # Get dictionary of zip codes for towns
 def get_zips():
+    global zips
     with open('zips.json') as json_file:
         zips = json.load(json_file)
-        return zips
+    return zips
 
 
 # Send email alert
@@ -113,11 +118,18 @@ def check_cvs():
 
 
 def main():
-    zips = get_zips()
-
     cvs_openings = check_cvs()
     for slot in cvs_openings:
         send_email_alert('CVS',slot[0],slot[2],code,links['CVS'],zips[slot[0]],sender_email,sender_pw,recipient)
 
 
-main()
+def schedule_checks(sc):
+    main()
+    s.enter(60, 1, schedule_checks, (sc,))
+
+
+get_zips()
+
+print('Starting now...')
+s.enter(60, 1, schedule_checks, (s,))
+s.run()
