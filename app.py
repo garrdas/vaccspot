@@ -98,6 +98,44 @@ def check_cvs():
     return open_slots
 
 
+def check_walgreens():
+    open_slots = []
+    vaccine_types = {}
+    timestamp = datetime.now(pytz.timezone('America/New_York')).strftime("%m/%d/%y %H:%M:%S")
+    wal_url = 'https://www.vaccinespotter.org/api/v0/stores/CT/walgreens.json'
+    
+    try:
+        req = requests.get(wal_url) #, stream=True) # , timeout=(3,6))
+    except Exception as e:
+        print('Error with request')
+        print('Error:', e)
+        return e
+    
+    response_json = req.json()
+
+    for wal in response_json:
+        if wal['appointments']:
+
+            for appointment in wal['appointments']:
+                vaccine_types[appointment['vaccine_types'][0]] = True
+            
+            open_slots.append([
+                wal['city'], 
+                wal['postal_code'],
+                timestamp, 
+                len(wal['appointments']), 
+                list(vaccine_types.keys()),
+                (wal['latitude'], wal['longitude'])
+                ])
+            
+    if not open_slots:
+        logging.info('No available appointments at Walgreens')
+        print('No Walgreens appointments available.')
+    else:
+        logging.info('Available appointments found with Walgreens')
+
+
+
 def main():
     # Configure basic logging
     logging.basicConfig(
@@ -117,7 +155,7 @@ def main():
     # Provider website links
     links = {
         'CVS':'https://www.cvs.com/vaccine/intake/store/cvd-store-select/first-dose-select',
-        'Walgreens':'https://www.walgreens.com/findcare/vaccination/covid-19/location-screening'
+        'Walgreens':'https://www.walgreens.com/findcare/vaccination/covid-19/'
     }
 
     # Get zip codes
@@ -130,6 +168,11 @@ def main():
         zipcode = zips.get(slot[0], 'Not Found')
 
         send_email_alert('CVS',slot[0],slot[2],code,links['CVS'],zipcode,sender_email,sender_pw,recipient)
+
+    wal_openings = fake_check_walgreens()
+    for wal_slot in wal_openings:
+
+        send_email_alert('Walgreens',wal_slot[0],wal_slot[2],code,links['Walgreens'],wal_slot[1],sender_email,sender_pw,recipient)
 
 
 def schedule_checks(sc):
