@@ -99,16 +99,18 @@ def check_cvs():
 
 
 def check_walgreens():
+    logging.debug('Called check_walgreens')
+
     open_slots = []
     vaccine_types = {}
     timestamp = datetime.now(pytz.timezone('America/New_York')).strftime("%m/%d/%y %H:%M:%S")
     wal_url = 'https://www.vaccinespotter.org/api/v0/stores/CT/walgreens.json'
     
     try:
-        req = requests.get(wal_url) #, stream=True) # , timeout=(3,6))
+        req = requests.get(wal_url)
+        logging.debug('Request successful')
     except Exception as e:
-        print('Error with request')
-        print('Error:', e)
+        print('Error with request:', e)
         return e
     
     response_json = req.json()
@@ -127,13 +129,12 @@ def check_walgreens():
                 list(vaccine_types.keys()),
                 (wal['latitude'], wal['longitude'])
                 ])
-            
+
     if not open_slots:
         logging.info('No available appointments at Walgreens')
         print('No Walgreens appointments available.')
     else:
-        logging.info('Available appointments found with Walgreens')
-
+        logging.info('Available appointments found at Walgreens')
 
 
 def main():
