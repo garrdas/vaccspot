@@ -170,7 +170,7 @@ def main():
 
         send_email_alert('CVS',slot[0],slot[2],code,links['CVS'],zipcode,sender_email,sender_pw,recipient)
 
-    wal_openings = fake_check_walgreens()
+    wal_openings = check_walgreens()
     for wal_slot in wal_openings:
 
         send_email_alert('Walgreens',wal_slot[0],wal_slot[2],code,links['Walgreens'],wal_slot[1],sender_email,sender_pw,recipient)
