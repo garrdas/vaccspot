@@ -119,7 +119,7 @@ def check_walgreens():
         if wal['appointments']:
 
             for appointment in wal['appointments']:
-                vaccine_types[appointment['vaccine_types'][0]] = True
+                vaccine_types[appointment['type']] = True
             
             open_slots.append([
                 wal['city'], 
@@ -135,6 +135,8 @@ def check_walgreens():
         print('No Walgreens appointments available.')
     else:
         logging.info('Available appointments found at Walgreens')
+
+    return open_slots
 
 
 def main():
