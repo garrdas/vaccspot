@@ -141,6 +141,11 @@ def check_cvs():
     # Parse response
     response_headers = req.headers
     response_json = req.json()
+
+    # Added for debugging
+    with open('walgreens_raw_response.json', 'w') as outfile:
+        json.dump(response_json, outfile)
+
     for CVS in response_json['responsePayloadData']['data']['CT']:
         if CVS['status'] != 'Fully Booked':
             open_slots.append([CVS['city'], CVS['status'], timestamp])
@@ -150,6 +155,12 @@ def check_cvs():
         print('No CVS appointments available.')
     else:
         logging.info('Available appointments found with CVS')
+
+    # Added for debugging
+    with open('cvs_open_slots.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for row in open_slots:
+            writer.writerow(row)
     
     return open_slots
 
@@ -171,6 +182,10 @@ def check_walgreens():
         return e
     
     response_json = req.json()
+
+    # Added for debugging
+    with open('walgreens_raw_response.json', 'w') as outfile:
+        json.dump(response_json, outfile)
 
     for wal in response_json:
         if wal['appointments']:
@@ -204,6 +219,12 @@ def check_walgreens():
     else:
         logging.info('Available appointments found at Walgreens')
 
+    # Added for debugging
+    with open('walgreens_open_slots.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for row in open_slots:
+            writer.writerow(row)
+
     return open_slots
 
 
@@ -216,6 +237,12 @@ def triage_cvs(cvs_priority_towns, open_slots):
         else:
             other_slots.append(slot)
 
+    # Added for debugging
+    with open('cvs_priority.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for row in priority_slots:
+            writer.writerow(row)
+
     return priority_slots, other_slots
 
 
@@ -227,6 +254,12 @@ def triage_walgreens(open_slots):
             priority_slots.append(slot)
         else:
             other_slots.append(slot)
+
+    # Added for debugging
+    with open('walgreens_priority.csv', 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for row in priority_slots:
+            writer.writerow(row)
 
     return priority_slots, other_slots
 
@@ -402,9 +435,9 @@ def main():
     # If changed since last time around
     if wal_changed_slots:
         for slot in wal_changed_slots:
-            # print('Walgreens changed slot!')
-            # print(slot)
-            wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
+            print('Walgreens changed slot!')
+            print(slot)
+            # wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
     for slot in wal_other_slots:
         pass
         # send_email_alert('Walgreens',wal_slot[0],wal_slot[2],wal_slot[1],sender_email,sender_pw,recipient)
@@ -412,7 +445,7 @@ def main():
 
 def schedule_checks(sc):
     main()
-    s.enter(60*5, 1, schedule_checks, (sc,)) # Run every 5 minutes
+    s.enter(20, 1, schedule_checks, (sc,)) # Run every 5 minutes
 
 
 # Create scheduler
