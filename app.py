@@ -345,46 +345,46 @@ def main():
         )
 
     # Update daily
-    cvs_priority_details = {
-        0: {
-        'town': 'WINDSOR',
-        'address': '484 WINDSOR AVE',
-        'zipcode': '06095'
-        },
-        1: {
-        'town': 'WINDSOR',
-        'address': '219 BROAD ST',
-        'zipcode': '06095'
-        },
-        2: {
-        'town': 'WINDSOR LOCKS',
-        'address': '90 MAIN ST',
-        'zipcode': '06096'
-        },
-        3: {
-        'town': 'COLCHESTER',
-        'address': '119 SOUTH MAIN ST',
-        'zipcode': '06415'
-        },
-        4: {
-        'town': 'ANSONIA',
-        'address': '24-26 PERSHING DR',
-        'zipcode': '06401'
-        },
-        5: {
-        'town': 'ENFIELD',
-        'address': '875 ENFIELD ST',
-        'zipcode': '06082'
-        },
-        6: {
-        'town': 'WILLIMANTIC',
-        'address': '1200 MAIN ST',
-        'zipcode': '06226'
-        }
-    }
+    # cvs_priority_details = {
+    #     0: {
+    #     'town': 'WINDSOR',
+    #     'address': '484 WINDSOR AVE',
+    #     'zipcode': '06095'
+    #     },
+    #     1: {
+    #     'town': 'WINDSOR',
+    #     'address': '219 BROAD ST',
+    #     'zipcode': '06095'
+    #     },
+    #     2: {
+    #     'town': 'WINDSOR LOCKS',
+    #     'address': '90 MAIN ST',
+    #     'zipcode': '06096'
+    #     },
+    #     3: {
+    #     'town': 'COLCHESTER',
+    #     'address': '119 SOUTH MAIN ST',
+    #     'zipcode': '06415'
+    #     },
+    #     4: {
+    #     'town': 'ANSONIA',
+    #     'address': '24-26 PERSHING DR',
+    #     'zipcode': '06401'
+    #     },
+    #     5: {
+    #     'town': 'ENFIELD',
+    #     'address': '875 ENFIELD ST',
+    #     'zipcode': '06082'
+    #     },
+    #     6: {
+    #     'town': 'WILLIMANTIC',
+    #     'address': '1200 MAIN ST',
+    #     'zipcode': '06226'
+    #     }
+    # }
 
     # Update daily
-    cvs_priority_towns = ['WINDSOR', 'WINDSOR LOCKS', 'COLCHESTER', 'ANSONIA', 'ENFIELD', 'WILLIMANTIC']
+    cvs_priority_towns = ['MERIDEN','PLAINVILLE','BLOOMFIELD','WINDSOR','WINDSOR LOCKS','COLCHESTER','ANSONIA','ENFIELD','WILLIMANTIC']
 
     # Read in config info
     info = yaml.safe_load(open('info.yml'))
