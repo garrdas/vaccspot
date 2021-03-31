@@ -11,12 +11,13 @@ import time
 import sched
 import logging
 
-# Get dictionary of zip codes for towns
+# Read json files
 def read_json(file):
     with open(file) as json_file:
         output_file = json.load(json_file)
     return output_file
 
+# Read csv files
 def read_csv(file):
     output_file = []
     with open(file) as csv_file:
@@ -193,6 +194,8 @@ def check_walgreens():
                 for app_type in app['appointment_types']:
                     app_types.add(app_type)
 
+            vaccine_types = list(vaccine_types)
+            app_types = list(app_types)
             open_slots.append([pfizer, town, address, zipcode, timestamp, number_of_slots, vaccine_types, app_types])
 
     if not open_slots:
@@ -208,7 +211,7 @@ def triage_cvs(cvs_priority_towns, open_slots):
     priority_slots = []
     other_slots = []
     for slot in open_slots:
-        if slot['city'] in cvs_priority_towns:
+        if slot[0] in cvs_priority_towns:
             priority_slots.append(slot)
         else:
             other_slots.append(slot)
@@ -223,6 +226,7 @@ def triage_walgreens(open_slots):
         if slot[0] == True:
             priority_slots.append(slot)
         else:
+            other_slots.append(slot)
 
     return priority_slots, other_slots
 
@@ -267,28 +271,30 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
 
     if walgreens_priority_cache:
         for slot in wal_priority_slots:
+            key = slot[2] + slot[1]
             temp_slot = slot
 
             # Cahce can't include timestamp or it will always be different
             del temp_slot[4]
             
-            if str(slot[2], slot[1]) not in walgreens_priority_cache.keys():
+            if key not in walgreens_priority_cache.keys():
                 changed_slots.append(slot)
-                walgreens_priority_cache[str(slot[2], slot[1])] = temp_slot
+                walgreens_priority_cache[key] = temp_slot
             
-            elif walgreens_priority_cache[str(slot[2], slot[1])] != temp_slot:
+            elif walgreens_priority_cache[key] != temp_slot:
                 changed_slots.append(slot)
-                walgreens_priority_cache[str(slot[2], slot[1])] = temp_slot
+                walgreens_priority_cache[key] = temp_slot
     
     else:
         for slot in wal_priority_slots:
+            key = slot[2] + slot[1]
             temp_slot = slot
 
             # Cahce can't include timestamp or it will always be different
             del temp_slot[4]
             
             changed_slots.append(slot)
-            walgreens_priority_cache[str(slot[2], slot[1])] = temp_slot
+            walgreens_priority_cache[key] = temp_slot
 
     with open('walgreens_high_priority_cache.json', 'w') as outfile:
         json.dump(walgreens_priority_cache, outfile)
@@ -378,6 +384,8 @@ def main():
         for slot in cvs_changed_slots:
             # Get zip code if town is dict key
             zipcode = zips.get(slot[0], 'Not Found')
+            # print('Walgreens changed slot!')
+            # print(slot)
             send_email_alert('CVS',slot[0],slot[2],zipcode,sender_email,sender_pw,recipient)
 
     for slot in cvs_other_slots:
@@ -394,6 +402,8 @@ def main():
     # If changed since last time around
     if wal_changed_slots:
         for slot in wal_changed_slots:
+            # print('Walgreens changed slot!')
+            # print(slot)
             wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
     for slot in wal_other_slots:
         pass
@@ -402,7 +412,7 @@ def main():
 
 def schedule_checks(sc):
     main()
-    s.enter(60*30, 1, schedule_checks, (sc,))
+    s.enter(60*5, 1, schedule_checks, (sc,)) # Run every 5 minutes
 
 
 # Create scheduler
