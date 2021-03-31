@@ -240,7 +240,7 @@ def handle_cvs_cache(cvs_priority_cache, cvs_priority_slots):
         for slot in cvs_priority_slots:
             temp_slot = slot
 
-            # Cahce can't include timestamp or it will always be different
+            # Cache can't include timestamp or it will always be different
             del temp_slot[2]
 
             if temp_slot not in cvs_priority_cache: # this will always be true if timestamp included
@@ -250,7 +250,7 @@ def handle_cvs_cache(cvs_priority_cache, cvs_priority_slots):
         for slot in cvs_priority_slots:
             temp_slot = slot
 
-            # Cahce can't include timestamp or it will always be different
+            # Cache can't include timestamp or it will always be different
             del temp_slot[2]
 
             cvs_priority_cache.append(temp_slot)
@@ -274,7 +274,7 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
             key = slot[2] + slot[1]
             temp_slot = slot
 
-            # Cahce can't include timestamp or it will always be different
+            # Cache can't include timestamp or it will always be different
             del temp_slot[4]
             
             if key not in walgreens_priority_cache.keys():
@@ -290,7 +290,7 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
             key = slot[2] + slot[1]
             temp_slot = slot
 
-            # Cahce can't include timestamp or it will always be different
+            # Cache can't include timestamp or it will always be different
             del temp_slot[4]
             
             changed_slots.append(slot)
