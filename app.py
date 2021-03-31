@@ -402,12 +402,12 @@ def main():
 
 def schedule_checks(sc):
     main()
-    s.enter(60, 1, schedule_checks, (sc,))
+    s.enter(60*30, 1, schedule_checks, (sc,))
 
 
 # Create scheduler
 s = sched.scheduler(time.time, time.sleep)
 
 print('Starting now...')
-s.enter(60, 1, schedule_checks, (s,))
+s.enter(0, 1, schedule_checks, (s,))
 s.run()
