@@ -152,7 +152,7 @@ def check_cvs():
     
     if not open_slots:
         logging.info('No available appointments found with CVS')
-        print('No CVS appointments available.')
+        print('No CVS appointments available at {}'.format(timestamp))
     else:
         logging.info('Available appointments found with CVS')
 
@@ -215,7 +215,7 @@ def check_walgreens():
 
     if not open_slots:
         logging.info('No available appointments at Walgreens')
-        print('No Walgreens appointments available.')
+        print('No Walgreens appointments available at {}'.format(timestamp))
     else:
         logging.info('Available appointments found at Walgreens')
 
@@ -271,20 +271,20 @@ def handle_cvs_cache(cvs_priority_cache, cvs_priority_slots):
     
     if cvs_priority_cache:
         for slot in cvs_priority_slots:
-            temp_slot = slot
+            index = 2
 
             # Cache can't include timestamp or it will always be different
-            del temp_slot[2]
+            temp_slot = slot[:index] + slot[index+1:]
 
             if temp_slot not in cvs_priority_cache: # this will always be true if timestamp included
                 cvs_priority_cache.append(temp_slot)
                 changed_slots.append(slot)
     else:
         for slot in cvs_priority_slots:
-            temp_slot = slot
+            index = 2
 
             # Cache can't include timestamp or it will always be different
-            del temp_slot[2]
+            temp_slot = slot[:index] + slot[index+1:]
 
             cvs_priority_cache.append(temp_slot)
             changed_slots.append(slot)
@@ -305,10 +305,10 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
     if walgreens_priority_cache:
         for slot in wal_priority_slots:
             key = slot[2] + slot[1]
-            temp_slot = slot
+            index = 2
 
             # Cache can't include timestamp or it will always be different
-            del temp_slot[4]
+            temp_slot = slot[:index] + slot[index+1:]
             
             if key not in walgreens_priority_cache.keys():
                 changed_slots.append(slot)
@@ -321,10 +321,10 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
     else:
         for slot in wal_priority_slots:
             key = slot[2] + slot[1]
-            temp_slot = slot
+            index = 2
 
             # Cache can't include timestamp or it will always be different
-            del temp_slot[4]
+            temp_slot = slot[:index] + slot[index+1:]
             
             changed_slots.append(slot)
             walgreens_priority_cache[key] = temp_slot
@@ -435,9 +435,9 @@ def main():
     # If changed since last time around
     if wal_changed_slots:
         for slot in wal_changed_slots:
-            print('Walgreens changed slot!')
-            print(slot)
-            # wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
+            # print('Walgreens changed slot!')
+            # print(slot)
+            wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
     for slot in wal_other_slots:
         pass
         # send_email_alert('Walgreens',wal_slot[0],wal_slot[2],wal_slot[1],sender_email,sender_pw,recipient)
@@ -445,7 +445,7 @@ def main():
 
 def schedule_checks(sc):
     main()
-    s.enter(20, 1, schedule_checks, (sc,)) # Run every 5 minutes
+    s.enter(60*5, 1, schedule_checks, (sc,)) # Run every 5 minutes
 
 
 # Create scheduler
