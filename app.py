@@ -48,12 +48,12 @@ def send_email_alert(provider,town,timestamp,zipcode,sender_email,sender_pw,reci
         # Construct message
         header = 'To:' + recipient + '\n' + 'From: ' + sender_email + '\n' + 'Subject: VACCSPOT: {} {} {} \n'.format(provider, town, zipcode)
         message = """\
-        \n
-        Vaccspot bot found an available vaccination slot!
+\n
+Vaccspot bot found an available vaccination slot!
 
-        Appointment(s) avaialbe at {a} {b} {c} as of {d}
+Appointment(s) avaialbe at {a} {b} {c} as of {d}
 
-        Go to {a} website now!""".format(a=provider, b=town, c=zipcode, d=timestamp)
+Go to {a} website now!""".format(a=provider, b=town, c=zipcode, d=timestamp)
         payload = header + message
 
         # Send email
@@ -93,16 +93,16 @@ def wal_priority_email_alert(town,address,zipcode,timestamp,number_of_slots,send
         # Construct message
         header = 'To:' + recipient + '\n' + 'From: ' + sender_email + '\n' + 'Subject: PRIORITY VACCSPOT: {} {} {} \n'.format(provider,town,zipcode)
         message = """\
-        \n
-        Vaccspot bot found an available Pfizer vaccination slot!
+\n
+Vaccspot bot found an available Pfizer vaccination slot!
 
-        There are {f} appointment(s) avaialbe at {a} {b} {c} {d} as of {e}
+There are {f} appointment(s) avaialbe at {a} {b} {c} {d} as of {e}
 
-        Current vaccines available: {g}
+Current vaccines available: {g}
 
-        Current appointment types available: {h}
-        
-        Go to {a} website now!""".format(a=provider, b=address, c=town, d=zipcode, e=timestamp, f=number_of_slots, g=vaccine_types, h=app_types)
+Current appointment types available: {h}
+
+Go to {a} website now!""".format(a=provider, b=address, c=town, d=zipcode, e=timestamp, f=number_of_slots, g=vaccine_types, h=app_types)
         payload = header + message
 
         # Send email
@@ -268,10 +268,10 @@ def handle_cvs_cache(cvs_priority_cache, cvs_priority_slots):
     
     # Need to add logging
     changed_slots = []
+    index = 2
     
     if cvs_priority_cache:
         for slot in cvs_priority_slots:
-            index = 2
 
             # Cache can't include timestamp or it will always be different
             temp_slot = slot[:index] + slot[index+1:]
@@ -281,7 +281,6 @@ def handle_cvs_cache(cvs_priority_cache, cvs_priority_slots):
                 changed_slots.append(slot)
     else:
         for slot in cvs_priority_slots:
-            index = 2
 
             # Cache can't include timestamp or it will always be different
             temp_slot = slot[:index] + slot[index+1:]
@@ -417,14 +416,14 @@ def main():
         for slot in cvs_changed_slots:
             # Get zip code if town is dict key
             zipcode = zips.get(slot[0], 'Not Found')
-            # print('Walgreens changed slot!')
-            # print(slot)
+            
             send_email_alert('CVS',slot[0],slot[2],zipcode,sender_email,sender_pw,recipient)
 
     for slot in cvs_other_slots:
         pass
         # # Get zip code if town is dict key
         # zipcode = zips.get(slot[0], 'Not Found')
+        
         # send_email_alert('CVS',slot[0],slot[2],zipcode,sender_email,sender_pw,recipient)
 
     # Check Walgreens appointments from Vaccine Spotter
@@ -435,12 +434,9 @@ def main():
     # If changed since last time around
     if wal_changed_slots:
         for slot in wal_changed_slots:
-            # print('Walgreens changed slot!')
-            # print(slot)
             wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
     for slot in wal_other_slots:
-        pass
-        # send_email_alert('Walgreens',wal_slot[0],wal_slot[2],wal_slot[1],sender_email,sender_pw,recipient)
+        wal_priority_email_alert(slot[1],slot[2],slot[3],slot[4],slot[5],sender_email,sender_pw,recipient,slot[6],slot[7])
 
 
 def schedule_checks(sc):
