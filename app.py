@@ -135,7 +135,8 @@ def check_cvs():
         req = requests.get(url, headers=headers)
         logging.debug('Request successful')
     except Exception as e:
-        logging.error('Error with CVS request:', e)
+        logging.debug('CVS requst failed')
+        logging.error('Error: {}'.format(str(e)))
         return e
     
     # Parse response
@@ -178,7 +179,8 @@ def check_walgreens():
         req = requests.get(wal_url)
         logging.debug('Request successful')
     except Exception as e:
-        print('Error with request:', e)
+        logging.debug('Walgreens requst failed')
+        logging.error('Error: {}'.format(str(e)))
         return e
     
     response_json = req.json()
