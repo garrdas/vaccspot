@@ -302,11 +302,11 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
     
     # Need to add logging
     changed_slots = []
+    index = 4
 
     if walgreens_priority_cache:
         for slot in wal_priority_slots:
             key = slot[2] + slot[1]
-            index = 2
 
             # Cache can't include timestamp or it will always be different
             temp_slot = slot[:index] + slot[index+1:]
@@ -322,7 +322,6 @@ def handle_walgreens_cache(walgreens_priority_cache, wal_priority_slots):
     else:
         for slot in wal_priority_slots:
             key = slot[2] + slot[1]
-            index = 2
 
             # Cache can't include timestamp or it will always be different
             temp_slot = slot[:index] + slot[index+1:]
